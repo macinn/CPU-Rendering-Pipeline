@@ -35,6 +35,8 @@
             shadingBox = new ComboBox();
             comboBox2 = new ComboBox();
             fogInput = new NumericUpDown();
+            linesBox = new CheckBox();
+            backFaceCullingButton = new CheckBox();
             ((System.ComponentModel.ISupportInitialize)Canvas).BeginInit();
             ((System.ComponentModel.ISupportInitialize)fogInput).BeginInit();
             SuspendLayout();
@@ -103,11 +105,37 @@
             fogInput.TabIndex = 6;
             fogInput.ValueChanged += fogInput_ValueChanged;
             // 
+            // linesBox
+            // 
+            linesBox.AutoSize = true;
+            linesBox.Location = new Point(714, 256);
+            linesBox.Name = "linesBox";
+            linesBox.Size = new Size(132, 24);
+            linesBox.TabIndex = 7;
+            linesBox.Text = "Draw only lines";
+            linesBox.UseVisualStyleBackColor = true;
+            linesBox.CheckedChanged += checkBox1_CheckedChanged;
+            // 
+            // backFaceCullingButton
+            // 
+            backFaceCullingButton.AutoSize = true;
+            backFaceCullingButton.Checked = true;
+            backFaceCullingButton.CheckState = CheckState.Checked;
+            backFaceCullingButton.Location = new Point(712, 284);
+            backFaceCullingButton.Name = "backFaceCullingButton";
+            backFaceCullingButton.Size = new Size(138, 24);
+            backFaceCullingButton.TabIndex = 8;
+            backFaceCullingButton.Text = "Backface culling";
+            backFaceCullingButton.UseVisualStyleBackColor = true;
+            backFaceCullingButton.CheckedChanged += backFaceCullingButton_CheckedChanged;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(950, 530);
+            Controls.Add(backFaceCullingButton);
+            Controls.Add(linesBox);
             Controls.Add(fogInput);
             Controls.Add(comboBox2);
             Controls.Add(shadingBox);
@@ -120,6 +148,7 @@
             ((System.ComponentModel.ISupportInitialize)Canvas).EndInit();
             ((System.ComponentModel.ISupportInitialize)fogInput).EndInit();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -131,5 +160,7 @@
         private ComboBox shadingBox;
         private ComboBox comboBox2;
         private NumericUpDown fogInput;
+        private CheckBox linesBox;
+        private CheckBox backFaceCullingButton;
     }
 }

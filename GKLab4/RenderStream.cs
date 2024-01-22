@@ -25,20 +25,14 @@ namespace GKLab4
         static int H { get { return canvas.Height; } }
         static double[,] ZBuffer;
         static Bitmap bitmap;
-        static List<Light> lights = new List<Light>();
+        public static List<Light> lights = new List<Light>();
 
         static List<Camera> cameras = new List<Camera>();
         static int index = 0;  
         public static Camera currentCam;
-        static Vector3 cameraPosition
-        {
-            get { return currentCam.Position; }
-        } 
-        static Vector3 V
-        {
-            get { return currentCam.Target - currentCam.Position; }
-        }
+        public static bool backFaceCulling = true;
         public static float fogFactor = 0.1f;
+        static Vector3 constantColor;
 
         public static ShadingType shadingType = ShadingType.Phong;
         public static void AddCamera(Camera camera)
@@ -67,6 +61,8 @@ namespace GKLab4
             bitmap = new Bitmap(W, H);
             currentG = Graphics.FromImage(bitmap);
 
+
+
             for (int i= 0; i < W; i++)
             {
                 for(int j = 0; j < H; j++)
@@ -82,9 +78,9 @@ namespace GKLab4
         }
         private static void putLine(Vertex p1, Vertex p2)
         {
-            if (float.IsNaN(p1.Position.X) || float.IsNaN(p1.Position.Y))
+            if (!float.IsFinite(p1.Position.X) || !float.IsFinite(p1.Position.Y))
                 return;
-            if (float.IsNaN(p2.Position.X) || float.IsNaN(p2.Position.Y))
+            if (!float.IsFinite(p2.Position.X) || !float.IsFinite(p2.Position.Y))
                 return;
 
             //https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
@@ -161,9 +157,9 @@ namespace GKLab4
 
             if (X < 0 || X >= W || Y < 0 || Y >= H)
                 return;
-            if (vertex.Position.Z < ZBuffer[X, Y])
+            if (-Math.Log2(vertex.Position.Z) < ZBuffer[X, Y])
             {
-                ZBuffer[X, Y] = vertex.Position.Z;
+                ZBuffer[X, Y] = -Math.Log2(vertex.Position.Z);
                 //g.DrawEllipse(new Pen(getColor(vertex)), X, Y, 1, 1);
                 if(shadingType == ShadingType.Phong)
                 {
@@ -174,6 +170,7 @@ namespace GKLab4
 
             Color getColorVector(Vector4 color)
             {
+                color = Vector4.Clamp(color, Vector4.Zero, Vector4.One);
                 return Color.FromArgb(255, (int)(color.X * 255f), (int)(color.Y * 255f), (int)(color.Z * 255f));
             }
         }
@@ -226,7 +223,7 @@ namespace GKLab4
             if (backFace(Points[0], Points[1], Points[2]))
                 return;
 
-            if (shadingType != ShadingType.Phong)
+            if (shadingType == ShadingType.Gouraud)
             {
                 updateColor(ref Points[0]);
                 updateColor(ref Points[1]);
@@ -275,13 +272,12 @@ namespace GKLab4
                     V1 = Lerp(-1, y, P1, P3);
                     V2 = Lerp(-1, y, P2, P3);
                 }
-                switch (shadingType)
+                if (shadingType == ShadingType.Constant)
                 {
-                    case ShadingType.Constant:
-                        V1.Normal = constantNormal;
-                        V2.Normal = constantNormal;
-                        break;
+                    V1.Normal = constantNormal;
+                    V2.Normal = constantNormal;
                 }
+                
                 putLine(V1, V2);
             }
         }
@@ -312,11 +308,11 @@ namespace GKLab4
         }
         private static bool backVeretx(Vertex vertex)
         {
-            //return Vector3.Dot(new Vector3(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z),
-            //     V) >= 0;
-            return false;
+            Vector3 V = Vector3.UnitZ;
+            return backFaceCulling && Vector3.Dot(new Vector3(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z),
+                 V) > 0;
         }
-        private static bool backFace(Vertex v1, Vertex v2, Vertex v3)
+        public static bool backFace(Vertex v1, Vertex v2, Vertex v3)
         {
             return backVeretx(v1) && backVeretx(v2) && backVeretx(v3);
         }
@@ -325,13 +321,13 @@ namespace GKLab4
             Vector4 I = new Vector4(0f);
             foreach (Light light in lights)
             {
-                I += light.getIntensity(vertex, cameraPosition);
+                I += light.getIntensity(vertex, currentCam.Position);
             }
             vertex.Color = new Vector4(I.X * vertex.Color.X, I.Y * vertex.Color.Y, I.Z * vertex.Color.Z, 1);
         }
         internal static float FogFactor(Vector4 z)
         {
-            Vector3 L = cameraPosition - new Vector3(z.X, z.Y, z.Z);
+            Vector3 L = currentCam.Position - new Vector3(z.X, z.Y, z.Z);
             return (float)Math.Exp(-fogFactor / 10 * L.Length());
         }
 

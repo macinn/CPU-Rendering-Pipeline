@@ -20,13 +20,19 @@ namespace GKLab4
         public Vertex[] vertices;
         public int[][] indices;
         public Matrix4x4 ModelMatrix = Matrix4x4.Identity;
+        public static bool _drawLines = true;
+        public Action<long> updateModelFun = (dt) => { };
 
-        public void Render(Matrix4x4 ViewMatrix, Matrix4x4 ProjectionMatrix)
+        public void Render(Matrix4x4 ViewMatrix, Matrix4x4 ProjectionMatrix, long dt)
         {
-            updateModelMatrix();
+            //updateModelMatrix();
+            this.updateModelFun(dt);
             Vertex[] projectedPoints = projectPoints(ViewMatrix, ProjectionMatrix);
-            //drawMesh(projectedPoints);
-            drawLines(projectedPoints);
+
+            if(_drawLines)
+                drawLines(projectedPoints);
+            else
+                drawMesh(projectedPoints);
         }
 
         private void updateModelMatrix() { }
@@ -36,13 +42,16 @@ namespace GKLab4
             return vertices.ToList().Select(
                 v =>
                 {
+                    Vector4 normal = Vector4.Transform(v.Normal, ModelMatrix);
+                    normal = Vector4.Transform(normal, ViewMatrix);
+
                     Vector4 projectedPosition = Vector4.Transform(v.Position, ModelMatrix);
                     projectedPosition = Vector4.Transform(projectedPosition, ViewMatrix);
                     float fogFacotr = RenderStream.FogFactor(projectedPosition);
                     projectedPosition = Vector4.Transform(projectedPosition, ProjectionMatrix);
                     projectedPosition /= projectedPosition.W;
 
-                    Vector4 normal = Vector4.Transform(v.Normal, ModelMatrix);
+                    
                     return new Vertex()
                     {
                         Position = projectedPosition,
@@ -68,6 +77,10 @@ namespace GKLab4
         {
             for (int i = 0; i < indices.Length; i++)
             {
+                if (RenderStream.backFace(projectedPoints[indices[i][0]], 
+                    projectedPoints[indices[i][1]], 
+                    projectedPoints[indices[i][2]]))
+                    continue;
                 RenderStream.drawLine(projectedPoints[indices[i][0]], projectedPoints[indices[i][1]]);
                 RenderStream.drawLine(projectedPoints[indices[i][1]], projectedPoints[indices[i][2]]);
                 RenderStream.drawLine(projectedPoints[indices[i][0]], projectedPoints[indices[i][2]]);
@@ -86,14 +99,14 @@ namespace GKLab4
         }
         static Vertex[] CreateCubeVertices(float sideLength, Vector4 color)
         {
-            Vector4 LeftUpFront = new Vector4(0, sideLength, 0, 1);
-            Vector4 RightUpFront = new Vector4(sideLength, sideLength, 0, 1);
-            Vector4 RightDownFront = new Vector4(sideLength, 0, 0, 1);
-            Vector4 LeftDownFront = new Vector4(0, 0, 0, 1);
-            Vector4 LeftUpBack = new Vector4(0, sideLength, sideLength, 1);
-            Vector4 RightUpBack = new Vector4(sideLength, sideLength, sideLength, 1);
-            Vector4 RightDownBack = new Vector4(sideLength, 0, sideLength, 1);
-            Vector4 LeftDownBack = new Vector4(0, 0, sideLength, 1);
+            Vector4 LeftUpBack =       new Vector4(0,          sideLength, 0, 1);
+            Vector4 RightUpBack =      new Vector4(sideLength, sideLength, 0, 1);
+            Vector4 RightDownBack =    new Vector4(sideLength, 0,          0, 1);
+            Vector4 LeftDownBack =     new Vector4(0,          0,          0, 1);
+            Vector4 LeftUpFront =        new Vector4(0,          sideLength, sideLength, 1);
+            Vector4 RightUpFront =       new Vector4(sideLength, sideLength, sideLength, 1);
+            Vector4 RightDownFront =     new Vector4(sideLength, 0,          sideLength, 1);
+            Vector4 LeftDownFront =      new Vector4(0,          0,          sideLength, 1);
 
             Vector4 frontN = new Vector4(0, 0, 1, 0);
             Vector4 backN = new Vector4(0, 0, -1, 0);
@@ -301,4 +314,69 @@ namespace GKLab4
             return indices;
         }
     }
+
+    public class Sphere : IRenderable
+    {
+        public Sphere(float radius, int meridians, int parallels, Vector4 color)
+        {
+            this.vertices = CreateSphereVertices(radius, meridians, parallels, color).ToArray();
+            this.indices = CreateIndices(meridians, parallels);
+        }
+
+        static Vertex[] CreateSphereVertices(float radius, int meridians, int parallels, Vector4 color)
+        {
+            List<Vertex> vertices = new List<Vertex>();
+            float meridianAngle = 2 * MathF.PI / meridians;
+            float parallelAngle = MathF.PI / parallels;
+
+            for (int i = 0; i < parallels; i++)
+            {
+                float parallel = i * parallelAngle;
+                for (int j = 0; j < meridians; j++)
+                {
+                    float meridian = j * meridianAngle;
+                    float x = radius * MathF.Sin(parallel) * MathF.Cos(meridian);
+                    float y = radius * MathF.Cos(parallel);
+                    float z = radius * MathF.Sin(parallel) * MathF.Sin(meridian);
+
+                    Vector4 position = new Vector4(x, y, z, 1);
+                    Vector4 normal = Vector4.Normalize(position);
+                    Vector4 color1 = color;
+
+                    vertices.Add(new Vertex()
+                    {
+                        Position = position,
+                        Normal = normal,
+                        Color = color1
+                    });
+                }
+            }
+            return vertices.ToArray();
+        }
+
+        int[][] CreateIndices(int meridians, int parallels)
+        {
+            List<int[]> indices = new List<int[]>();
+            for (int i = 0; i < parallels - 1; i++)
+            {
+                for (int j = 0; j < meridians; j++)
+                {
+                    int[] indices1 = new int[3];
+                    indices1[0] = (i * meridians + j ) % (parallels*meridians);
+                    indices1[1] = (i * meridians + j + 1) % (parallels * meridians);
+                    indices1[2] = ((i + 1) * meridians + j) % (parallels * meridians);
+                    indices.Add(indices1);
+
+                    int[] indices2 = new int[3];
+                    indices2[0] = (i * meridians + j + 1) % (parallels * meridians);
+                    indices2[1] = ((i + 1) * meridians + j + 1) % (parallels * meridians);
+                    indices2[2] = ((i + 1) * meridians + j) % (parallels * meridians); 
+                    indices.Add(indices2);
+                }
+            }
+
+            return indices.ToArray();
+        }
+    }
+
 }

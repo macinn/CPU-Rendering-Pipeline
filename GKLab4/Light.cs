@@ -6,23 +6,38 @@ namespace GKLab4
     public abstract class Light
     {
         protected Vector4 color;
-        protected Vector4 lightPos4;
-        protected Vector3 lightPos3;
+        protected Vector4 _lightPos4;
+        protected Vector3 _lightPos3;
+        public Vector4 lightPos4 { get => Vector4.Transform(_lightPos4, viewM); }
+        public Vector3 lightPos3 { get => new Vector3(lightPos4.X, lightPos4.Y, lightPos4.Z); }
+
+        Matrix4x4 viewM = Matrix4x4.Identity;
         public bool enabled = true;
+        public Action<long> updateCallback = (dt) => { };
 
         public Light(Vector4 color, Vector4 position)
         {
             this.color = color;
-            lightPos4 = position;
-            lightPos3 = new Vector3(position.X, position.Y, position.Z);
+            setPosition(position);
         }
-
+        public void setPosition(Vector4 position)
+        {
+            _lightPos4 = position;
+            // lightPos3 = new Vector3(position.X, position.Y, position.Z);
+        }
         public void setView(Matrix4x4 viewM)
         {
-            lightPos4 = Vector4.Transform(lightPos4, viewM);
-            lightPos3 = new Vector3(lightPos4.X, lightPos4.Y, lightPos4.Z);
+            this.viewM = viewM;
+            //lightPos4 = Vector4.Transform(lightPos4, viewM);
+            //lightPos3 = new Vector3(lightPos4.X, lightPos4.Y, lightPos4.Z);
         }
         public abstract Vector4 getIntensity(Vertex vertex, Vector3 camPos);
+
+        internal void setPosition(Vector3 translation)
+        {
+            // lightPos3 = translation;
+            _lightPos4 = new Vector4(translation.X, translation.Y, translation.Z, 1);
+        }
     }
 
     public class PointLight : Light
@@ -75,19 +90,24 @@ namespace GKLab4
 
     public class SpotLight : Light
     {
-        Vector3 spotDirection, D;
+        public Vector3 spotDirection, D;
         float spotCosineCutoff = 0.3f;
-        float spotExponent = 10;
+        float spotExponent = 1;
         public SpotLight(Vector4 color, Vector4 position, Vector3 spotDirection) : base(color, position)
         {
             this.spotDirection = spotDirection;
             this.D = -Vector3.Normalize(spotDirection);
         }
 
+        public void setSpotDirection(Vector3 spotDirection)
+        {
+            this.spotDirection = spotDirection;
+            this.D = -Vector3.Normalize(spotDirection);
+        }
         public override Vector4 getIntensity(Vertex vertex, Vector3 camPos)
         {
-            Vector3 position = new Vector3(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
-            Vector3 L = Vector3.Normalize(lightPos3 - position);
+            Vector3 objectPosition = new Vector3(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
+            Vector3 L = Vector3.Normalize(lightPos3 - objectPosition);
             float spotCosine = Vector3.Dot(D, L);
 
             if(spotCosine < spotCosineCutoff)
@@ -100,23 +120,25 @@ namespace GKLab4
             const float ks = 0.5f;
             const float m = 30f;
 
-            Vector3 normal = new Vector3(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
 
-            Vector3 R = (2 * Vector3.Dot(normal, position) * normal) - lightPos3;
-            Vector3 V = Vector3.Normalize(camPos - position);
+            Vector3 N = new Vector3(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
 
-            float cosNL = Math.Clamp(Vector3.Dot(normal, lightPos3), 0, 1);
+            Vector3 R = (2 * Vector3.Dot(N, L) * N) - L;
+
+            // TODO: V
+            Vector3 V = new Vector3(0, 0, 1);
+
+            float cosNL = Math.Clamp(Vector3.Dot(N, L), 0, 1);
             float cosVRM = (float)Math.Pow(Math.Clamp(Vector3.Dot(V, R), 0, 1), m);
-            float loR = color.X * vertex.Color.X;
-            float loG = color.Y * vertex.Color.Y;
-            float loB = color.Z * vertex.Color.Z;
+            float loR = color.X;
+            float loG = color.Y;
+            float loB = color.Z;
 
             float red = (kd * loR * cosNL) + (ks * loR * cosVRM) * spotFactor;
             float green = (kd * loG * cosNL) + (ks * loG * cosVRM) * spotFactor;
             float blue = (kd * loB * cosNL) + (ks * loB * cosVRM) * spotFactor;
 
-
-            return new Vector4(red, green, blue, 1);
+            return new Vector4(red, green, blue, 1); ;
         }
     }
 }
