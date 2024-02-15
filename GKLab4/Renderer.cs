@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 // TODO: ruchomy reflektor
 
-namespace GKLab4
+namespace CPU_Rendering
 {
 
     public class Renderer

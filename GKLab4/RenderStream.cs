@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace GKLab4
+namespace CPU_Rendering
 {
     public enum ShadingType
     {
@@ -23,6 +23,7 @@ namespace GKLab4
         static PictureBox canvas;
         static int W { get { return canvas.Width; } }
         static int H { get { return canvas.Height; } }
+
         static double[,] ZBuffer;
         static Bitmap bitmap;
         public static List<Light> lights = new List<Light>();

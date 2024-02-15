@@ -6,7 +6,7 @@ using System.Numerics;
 using System.Text;
 using MathNet.Numerics.LinearAlgebra;
 
-namespace GKLab4
+namespace CPU_Rendering
 {
     public class Camera
     {

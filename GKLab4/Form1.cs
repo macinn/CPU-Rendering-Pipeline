@@ -2,7 +2,7 @@ using System.Numerics;
 using Timer = System.Windows.Forms.Timer;
 
 
-namespace GKLab4
+namespace CPU_Rendering
 {
     public partial class Form1 : Form
     {

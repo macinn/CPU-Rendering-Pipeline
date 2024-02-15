@@ -1,7 +1,7 @@
 ﻿using System.DirectoryServices;
 using System.Numerics;
 
-namespace GKLab4
+namespace CPU_Rendering
 {
     public abstract class Light
     {

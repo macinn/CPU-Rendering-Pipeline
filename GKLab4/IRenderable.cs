@@ -7,14 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace GKLab4
-{
-    public struct Vertex
-    {
-        public Vector4 Position;
-        public Vector4 Normal;
-        public Vector4 Color;
-    }
+namespace CPU_Rendering
+{ 
     public abstract class IRenderable
     {
         public Vertex[] vertices;

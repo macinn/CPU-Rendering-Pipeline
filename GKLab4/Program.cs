@@ -1,4 +1,4 @@
-namespace GKLab4
+namespace CPU_Rendering
 {
     internal static class Program
     {
