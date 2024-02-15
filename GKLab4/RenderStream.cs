@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Numerics;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using System.Numerics;
 
 namespace GKLab4
 {
@@ -28,7 +19,7 @@ namespace GKLab4
         public static List<Light> lights = new List<Light>();
 
         static List<Camera> cameras = new List<Camera>();
-        static int index = 0;  
+        static int index = 0;
         public static Camera currentCam;
         public static bool backFaceCulling = true;
         public static float fogFactor = 0.1f;
@@ -38,7 +29,7 @@ namespace GKLab4
         public static void AddCamera(Camera camera)
         {
             cameras.Add(camera);
-            if(currentCam == null)
+            if (currentCam == null)
             {
                 currentCam = camera;
             }
@@ -50,22 +41,22 @@ namespace GKLab4
         }
         public static void addLight(Light light)
         {
-            
+
             lights.Add(light);
         }
 
         private static Graphics currentG;
         static Graphics g { get { return currentG; } }
         public static void startDraw()
-        {  
+        {
             bitmap = new Bitmap(W, H);
             currentG = Graphics.FromImage(bitmap);
 
 
 
-            for (int i= 0; i < W; i++)
+            for (int i = 0; i < W; i++)
             {
-                for(int j = 0; j < H; j++)
+                for (int j = 0; j < H; j++)
                 {
                     ZBuffer[i, j] = double.PositiveInfinity;
                 }
@@ -111,7 +102,7 @@ namespace GKLab4
                     xi = -1;
                     dx = -dx;
                 }
-                int D = 2 * dx - dy;
+                int D = (2 * dx) - dy;
                 int x1 = (int)point1.Position.X;
                 for (int y1 = (int)point1.Position.Y; y1 <= point2.Position.Y; y1++)
                 {
@@ -135,7 +126,7 @@ namespace GKLab4
                     yi = -1;
                     dy = -dy;
                 }
-                int D = 2 * dy - dx;
+                int D = (2 * dy) - dx;
                 int y1 = (int)point0.Position.Y;
                 for (int x1 = (int)point0.Position.X; x1 <= point1.Position.X; x1++)
                 {
@@ -161,7 +152,7 @@ namespace GKLab4
             {
                 ZBuffer[X, Y] = -Math.Log2(vertex.Position.Z);
                 //g.DrawEllipse(new Pen(getColor(vertex)), X, Y, 1, 1);
-                if(shadingType == ShadingType.Phong)
+                if (shadingType == ShadingType.Phong)
                 {
                     updateColor(ref vertex);
                 }
@@ -176,11 +167,11 @@ namespace GKLab4
         }
         private static Vertex Lerp(int X, int Y, Vertex v1, Vertex v2)
         {
-            float xDiff = (v2.Position.X - v1.Position.X);
-            float yDiff = (v2.Position.Y - v1.Position.Y);
+            float xDiff = v2.Position.X - v1.Position.X;
+            float yDiff = v2.Position.Y - v1.Position.Y;
             float amount;
             bool validXY = X != -1 && Y != -1;
-            if(xDiff > yDiff && X!= -1)
+            if (xDiff > yDiff && X != -1)
             {
                 amount = (X - v1.Position.X) / xDiff;
             }
@@ -190,7 +181,7 @@ namespace GKLab4
             }
             amount = Math.Clamp(amount, 0, 1);
 
-            if(yDiff == 0 && xDiff == 0)
+            if (yDiff == 0 && xDiff == 0)
             {
                 amount = 1;
             }
@@ -232,9 +223,9 @@ namespace GKLab4
             Vertex P1 = Points[0];
             Vertex P2 = Points[1];
             Vertex P3 = Points[2];
-            Vector4 constantNormal = (P1.Normal + P2.Normal +P3.Normal)/3;
+            Vector4 constantNormal = (P1.Normal + P2.Normal + P3.Normal) / 3;
 
-            if(P1.Position.Y > P2.Position.Y)
+            if (P1.Position.Y > P2.Position.Y)
             {
                 (P2, P1) = (P1, P2);
             }
@@ -260,7 +251,7 @@ namespace GKLab4
             for (int y = (int)P1.Position.Y; y <= (int)P3.Position.Y; y++)
             {
                 Vertex V1, V2;
-                if(y < (int)P2.Position.Y)
+                if (y < (int)P2.Position.Y)
                 {
                     // P1 - P2, P1 - P3
                     V1 = Lerp(-1, y, P1, P2);
@@ -277,7 +268,7 @@ namespace GKLab4
                     V1.Normal = constantNormal;
                     V2.Normal = constantNormal;
                 }
-                
+
                 putLine(V1, V2);
             }
         }
@@ -288,15 +279,15 @@ namespace GKLab4
             Vector4 B = vB.Position;
             Vector4 C = vC.Position;
 
-            float alpha = ((B.Y - C.Y) * (X - C.X) + (C.X - B.X) * (Y - C.Y)) /
-                          ((B.Y - C.Y) * (A.X - C.X) + (C.X - B.X) * (A.Y - C.Y));
+            float alpha = (((B.Y - C.Y) * (X - C.X)) + ((C.X - B.X) * (Y - C.Y))) /
+                          (((B.Y - C.Y) * (A.X - C.X)) + ((C.X - B.X) * (A.Y - C.Y)));
 
-            float beta = ((C.Y - A.Y) * (X - C.X) + (A.X - C.X) * (Y - C.Y)) /
-                         ((B.Y - C.Y) * (A.X - C.X) + (C.X - B.X) * (A.Y - C.Y));
+            float beta = (((C.Y - A.Y) * (X - C.X)) + ((A.X - C.X) * (Y - C.Y))) /
+                         (((B.Y - C.Y) * (A.X - C.X)) + ((C.X - B.X) * (A.Y - C.Y)));
 
             float gamma = 1 - alpha - beta;
 
-            return new Vertex() { Position = alpha * A + beta * B + gamma * C };
+            return new Vertex() { Position = (alpha * A) + (beta * B) + (gamma * C) };
         }
         public static void drawLine(Vertex p1, Vertex p2)
         {
@@ -333,7 +324,7 @@ namespace GKLab4
 
         internal static void changeCamera()
         {
-            currentCam = cameras[(++index)%cameras.Count];
+            currentCam = cameras[(++index) % cameras.Count];
         }
     }
 }

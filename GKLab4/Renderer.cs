@@ -1,13 +1,5 @@
-﻿using Microsoft.VisualBasic.Logging;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 // TODO: ruchomy reflektor
 
@@ -23,7 +15,7 @@ namespace GKLab4
         private List<IRenderable> meshes;
         private List<Vector4> lightPositions;
         private Color backgroundColor = Color.LightBlue;
-        
+
 
 
         // Canvas
@@ -46,15 +38,15 @@ namespace GKLab4
             stopwatch.Stop();
             dt = stopwatch.ElapsedMilliseconds;
             stopwatch.Restart();
-        }   
+        }
         public Renderer(PictureBox canvas)
         {
             RenderStream.setUp(canvas);
             meshes = new List<IRenderable>();
 
             RenderStream.AddCamera(new Camera(
-                new Vector3(0, 0, 3), 
-                new Vector3(0, 0, 0), 
+                new Vector3(0, 0, 3),
+                new Vector3(0, 0, 0),
                 new Vector3(0, 1, 0)));
             RenderStream.AddCamera(new Camera(
                 new Vector3(10, 10, 0),
@@ -122,11 +114,11 @@ namespace GKLab4
         {
             this.ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(fov, aspectRatio, nearPlane, farPlane);
         }
-                
+
         public void addMesh(IRenderable mesh)
         {
             meshes.Add(mesh);
-        }   
+        }
         public void render()
         {
             updateDt();
@@ -134,8 +126,8 @@ namespace GKLab4
             RenderStream.startDraw();
             //meshes[0].ModelMatrix = Matrix4x4.CreateRotationX((float)(Math.PI / 8));
             //meshes[0].ModelMatrix = Matrix4x4.CreateRotationY((float)(Math.PI / 8));
-            meshes[0].ModelMatrix = meshes[0].ModelMatrix* Matrix4x4.CreateRotationY(0.001f * dt);
-            meshes[0].ModelMatrix = meshes[0].ModelMatrix* Matrix4x4.CreateRotationX(0.001f * dt);
+            meshes[0].ModelMatrix = meshes[0].ModelMatrix * Matrix4x4.CreateRotationY(0.001f * dt);
+            meshes[0].ModelMatrix = meshes[0].ModelMatrix * Matrix4x4.CreateRotationX(0.001f * dt);
 
             this.ViewMatrix = RenderStream.currentCam.GetViewMatrix();
             RenderStream.currentCam.updateCallback(dt);
@@ -146,11 +138,11 @@ namespace GKLab4
                 light.updateCallback(dt);
             }
 
-            foreach (var mesh in meshes)
-                {
-                    mesh.Render(ViewMatrix, ProjectionMatrix, dt);
-                }
-            
+            foreach (IRenderable mesh in meshes)
+            {
+                mesh.Render(ViewMatrix, ProjectionMatrix, dt);
+            }
+
             RenderStream.flush();
         }
     }

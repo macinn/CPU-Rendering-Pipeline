@@ -1,5 +1,4 @@
-﻿using System.DirectoryServices;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace GKLab4
 {
@@ -51,7 +50,7 @@ namespace GKLab4
             const float kd = 0.5f;
             const float ks = 0.5f;
             const float m = 30f;
-            
+
 
             Vector3 objectPosition = new Vector3(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
             Vector3 N = new Vector3(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
@@ -60,9 +59,9 @@ namespace GKLab4
             Vector3 R = (2 * Vector3.Dot(N, L) * N) - L;
 
             // TODO: V
-            Vector3 V = new Vector3(0,0,1);
+            Vector3 V = new Vector3(0, 0, 1);
 
-            float cosNL = Math.Clamp(Vector3.Dot(N, L),0,1);
+            float cosNL = Math.Clamp(Vector3.Dot(N, L), 0, 1);
             float cosVRM = (float)Math.Pow(Math.Clamp(Vector3.Dot(V, R), 0, 1), m);
             float loR = color.X;
             float loG = color.Y;
@@ -110,10 +109,10 @@ namespace GKLab4
             Vector3 L = Vector3.Normalize(lightPos3 - objectPosition);
             float spotCosine = Vector3.Dot(D, L);
 
-            if(spotCosine < spotCosineCutoff)
+            if (spotCosine < spotCosineCutoff)
             {
                 return Vector4.Zero;
-            } 
+            }
 
             float spotFactor = (float)Math.Pow(spotCosine, spotExponent);
             const float kd = 0.5f;
@@ -134,9 +133,9 @@ namespace GKLab4
             float loG = color.Y;
             float loB = color.Z;
 
-            float red = (kd * loR * cosNL) + (ks * loR * cosVRM) * spotFactor;
-            float green = (kd * loG * cosNL) + (ks * loG * cosVRM) * spotFactor;
-            float blue = (kd * loB * cosNL) + (ks * loB * cosVRM) * spotFactor;
+            float red = (kd * loR * cosNL) + (ks * loR * cosVRM * spotFactor);
+            float green = (kd * loG * cosNL) + (ks * loG * cosVRM * spotFactor);
+            float blue = (kd * loB * cosNL) + (ks * loB * cosVRM * spotFactor);
 
             return new Vector4(red, green, blue, 1); ;
         }
