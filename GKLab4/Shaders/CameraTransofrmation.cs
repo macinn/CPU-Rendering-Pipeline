@@ -16,7 +16,7 @@ internal partial class Pipeline
             return state;
 
             void updateVector(ref Vector4 vector) 
-                => vector = Vector4.Transform(vector, viewMatrix);
+                => vector = Vector4.Transform(vector, Pipeline.viewMatrix);
 
             void updateVertex(ref Vertex vertex)
             {

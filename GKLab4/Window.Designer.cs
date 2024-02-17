@@ -129,7 +129,7 @@
             backFaceCullingButton.UseVisualStyleBackColor = true;
             backFaceCullingButton.CheckedChanged += backFaceCullingButton_CheckedChanged;
             // 
-            // Form1
+            // Window
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -143,8 +143,8 @@
             Controls.Add(button2);
             Controls.Add(camerButton);
             Controls.Add(Canvas);
-            Name = "Form1";
-            Text = "Form1";
+            Name = "Window";
+            Text = "Window";
             ((System.ComponentModel.ISupportInitialize)Canvas).EndInit();
             ((System.ComponentModel.ISupportInitialize)fogInput).EndInit();
             ResumeLayout(false);
