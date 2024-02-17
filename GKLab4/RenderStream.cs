@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace GKLab4
+namespace CPU_Rendering
 {
     public enum ShadingType
     {
@@ -14,6 +14,7 @@ namespace GKLab4
         static PictureBox canvas;
         static int W { get { return canvas.Width; } }
         static int H { get { return canvas.Height; } }
+
         static double[,] ZBuffer;
         static Bitmap bitmap;
         public static List<Light> lights = new List<Light>();
