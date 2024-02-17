@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace GKLab4
+namespace CPU_Rendering
 {
     public class Camera
     {
