@@ -4,16 +4,13 @@ using Utils;
 
 namespace CPU_Rendering
 {
-    public interface IShader
+    public interface IShader<T>
     {
-        public static void Process(object? state) { }
+        abstract public static T Process(T state);
     }
 
     static class Pipeline
     {
-        public static BlockingCollection<Traiangle> traiangles = [];
-        public static BlockingCollection<Vertex> pixels = [];
-
         public static Matrix4x4 viewMatrix;
         public static Matrix4x4 projMatrix;
 
@@ -27,23 +24,37 @@ namespace CPU_Rendering
         public static float fogFactor = 0.1f;
         static Vector3 constantColor;
 
-        static private Chain<IShader> shaders;
+        private static readonly ProcessingChain<IRenderable, Traiangle> shaders;
 
         static Pipeline()
         {
             // TODO: init viewMatrix
             // TODO: init projMatrix
-            shaders = [new VertexModule(), new FragmentModule(), new DrawModule()];
+            
+            shaders = new ProcessingChain<IRenderable, Traiangle>(
+                VertexModule.Process,
+                [
+                FragmentModule.Process,
+                DrawModule.Process
+                ]);
         }
 
 
-        static public void StartProcessing(List<IRenderable> objects)
+        static public void StartProcessing(IList<IRenderable> objects)
         {
-            foreach (IRenderable renderable in objects)
-                ThreadPool.QueueUserWorkItem(VertexModule.Process, renderable);
+            Parallel.ForEach(objects, obj =>
+                {
+                    List<Traiangle> traiangles = VertexModule.Process(obj);
+                    Parallel.ForEach(traiangles, traiangle =>
+                    {
+                        shaders.Execute(traiangle);
+                        DrawModule.CalcaultePosition(ref traiangle);
+                    });
+                    
+                });
         }
 
-        class VertexModule : IShader
+        class VertexModule
         {
             private static Vertex[] UpdateVerticies(IRenderable renderable)
             {
@@ -63,47 +74,28 @@ namespace CPU_Rendering
 
                 return newVerticies;
             }
-
-            public static void Process(IList<IRenderable> renderables)
-            {
-                foreach (IRenderable renderable in renderables)
-                {
-                    ThreadPool.QueueUserWorkItem(VertexModule.Process, renderable);
-                }
-            }
            
-            public static void Process(object? state)
-            {
-                if(state != null)
-                {
-                    VertexModule.Process((IRenderable)state);
-                }
-            }
-
-            public static void Process(IRenderable renderable)
+            public static List<Traiangle> Process(IRenderable renderable)
             {
                 Vertex[] projectedPoints = VertexModule.UpdateVerticies(renderable);
 
-                foreach (int[] indicies in renderable.indices)
-                {
-                    ThreadPool.QueueUserWorkItem(FragmentModule.Process,
-                        new Traiangle(
+                return renderable.indices.Select((int[] indicies) 
+                    => new Traiangle(
                             projectedPoints[indicies[0]],
                             projectedPoints[indicies[1]],
-                            projectedPoints[indicies[2]]));
-                }
+                            projectedPoints[indicies[2]])).ToList();
             }
         }
 
-        class FragmentModule : IShader
+        class FragmentModule : IShader<Traiangle>
         {
-            public static void Process(object? state)
+            public static Traiangle Process(Traiangle state)
             {
-
+                throw new NotImplementedException();
             }
         }
 
-        class DrawModule : IShader
+        class DrawModule : IShader<Traiangle>
         {
             public static void CalcaultePosition(ref Traiangle traiangle)
             {
@@ -115,6 +107,11 @@ namespace CPU_Rendering
 
                 traiangle.Vertices[2].Position.X = (traiangle.Vertices[2].Position.X + 1) * Pipeline.canvasW;
                 traiangle.Vertices[2].Position.Y = (traiangle.Vertices[2].Position.Y + 1) * Pipeline.canvasH;
+            }
+
+            public static Traiangle Process(Traiangle state)
+            {
+                throw new NotImplementedException();
             }
         }
 
