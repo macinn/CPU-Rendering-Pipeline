@@ -10,6 +10,7 @@ internal partial class Pipeline
     {
         public static Traiangle Process(Traiangle state)
         {
+            // TODO: Implement clipping
             return state;
         }
     }

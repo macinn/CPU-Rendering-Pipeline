@@ -1,16 +1,6 @@
-﻿using Microsoft.VisualBasic.Logging;
-using Objects;
-using System;
-using System.Collections.Generic;
+﻿using Objects;
 using System.Diagnostics;
-using System.Linq;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-// TODO: ruchomy reflektor
 
 namespace Deprecated
 {
@@ -89,21 +79,21 @@ namespace Deprecated
             setProjectionMatrix(MathF.PI / 4, canvas.Width / canvas.Height, 0.1f, 10000f);
 
 
-            RenderStream.addLight(new AmbientLight(new Vector4(0.2f, 0.2f, 0.2f, 1)));
+            RenderStream.addLight(new AmbientLight(new Vector3(0.2f, 0.2f, 0.2f)));
 
             Light pointLight = new PointLight(
-                new Vector4(0.4f, 0.4f, 0.4f, 1),
+                new Vector3(0.4f, 0.4f, 0.4f),
                 position: new Vector4(0, 0, 0, 1));
             RenderStream.addLight(pointLight);
 
             SpotLight refletor2 = new SpotLight(
-                new Vector4(0.7f, 0.1f, 0.1f, 1),
+                new Vector3(0.7f, 0.1f, 0.1f),
                  new Vector4(0, 0, -10, 1),
                  new Vector3(0, 0, 1));
             RenderStream.addLight(refletor2);
 
             SpotLight reflector = new SpotLight(
-                new Vector4(0.0f, 0.7f, 0.0f, 1),
+                new Vector3(0.0f, 0.7f, 0.0f),
                  new Vector4(0, 0, 0, 1),
                 new Vector3(0, 0, 1));
 

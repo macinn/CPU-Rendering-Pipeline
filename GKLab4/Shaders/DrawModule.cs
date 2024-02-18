@@ -8,6 +8,7 @@ internal partial class Pipeline
 {
     class DrawModule
     {
+        // TODO: Implement drawing
         public void CalcaultePosition(ref Traiangle traiangle)
         {
             traiangle.Vertices[0].Position.X = calculateX(traiangle.Vertices[0].Position.X);

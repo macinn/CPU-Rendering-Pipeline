@@ -171,9 +171,9 @@ namespace Deprecated
                 g.DrawEllipse(new Pen(getColorVector(vertex.Color)), X, Y, 1, 1);
             }
 
-            Color getColorVector(Vector4 color)
+            Color getColorVector(Vector3 color)
             {
-                color = Vector4.Clamp(color, Vector4.Zero, Vector4.One);
+                color = Vector3.Clamp(color, Vector3.Zero, Vector3.One);
                 return Color.FromArgb(255, (int)(color.X * 255f), (int)(color.Y * 255f), (int)(color.Z * 255f));
             }
         }
@@ -200,8 +200,8 @@ namespace Deprecated
             Vertex v = new Vertex
             {
                 Position = Vector4.Lerp(v1.Position, v2.Position, amount),
-                Color = Vector4.Lerp(v1.Color, v2.Color, amount),
-                Normal = Vector4.Lerp(v1.Normal, v2.Normal, amount)
+                Color = Vector3.Lerp(v1.Color, v2.Color, amount),
+                Normal = Vector3.Lerp(v1.Normal, v2.Normal, amount)
             };
             if (validXY)
             {
@@ -235,7 +235,7 @@ namespace Deprecated
             Vertex P1 = Points[0];
             Vertex P2 = Points[1];
             Vertex P3 = Points[2];
-            Vector4 constantNormal = (P1.Normal + P2.Normal + P3.Normal) / 3;
+            Vector3 constantNormal = (P1.Normal + P2.Normal + P3.Normal) / 3;
 
             if (P1.Position.Y > P2.Position.Y)
             {
@@ -321,12 +321,12 @@ namespace Deprecated
         }
         private static void updateColor(ref Vertex vertex)
         {
-            Vector4 I = new Vector4(0f);
+            Vector3 I = new Vector3(0f);
             foreach (Light light in lights)
             {
                 I += light.getIntensity(vertex, currentCam.Position);
             }
-            vertex.Color = new Vector4(I.X * vertex.Color.X, I.Y * vertex.Color.Y, I.Z * vertex.Color.Z, 1);
+            vertex.Color = new Vector3(I.X * vertex.Color.X, I.Y * vertex.Color.Y, I.Z * vertex.Color.Z);
         }
         internal static float FogFactor(Vector4 z)
         {

@@ -6,7 +6,7 @@ namespace Objects
 {
     public abstract class Light
     {
-        protected Vector4 color;
+        protected Vector3 color;
         protected Vector4 _lightPos4;
         protected Vector3 _lightPos3;
         public Vector4 lightPos4 { get => Vector4.Transform(_lightPos4, viewM); }
@@ -16,7 +16,7 @@ namespace Objects
         public bool enabled = true;
         public Action<long> updateCallback = (dt) => { };
 
-        public Light(Vector4 color, Vector4 position)
+        public Light(Vector3 color, Vector4 position)
         {
             this.color = color;
             setPosition(position);
@@ -32,7 +32,7 @@ namespace Objects
             //lightPos4 = Vector4.Transform(lightPos4, viewM);
             //lightPos3 = new Vector3(lightPos4.X, lightPos4.Y, lightPos4.Z);
         }
-        public abstract Vector4 getIntensity(Vertex vertex, Vector3 camPos);
+        public abstract Vector3 getIntensity(Vertex vertex, Vector3 camPos);
 
         internal void setPosition(Vector3 translation)
         {
@@ -43,11 +43,11 @@ namespace Objects
 
     public class PointLight : Light
     {
-        public PointLight(Vector4 color, Vector4 position) : base(color, position)
+        public PointLight(Vector3 color, Vector4 position) : base(color, position)
         {
         }
 
-        public override Vector4 getIntensity(Vertex vertex, Vector3 camPos)
+        public override Vector3 getIntensity(Vertex vertex, Vector3 camPos)
         {
             const float kd = 0.5f;
             const float ks = 0.5f;
@@ -73,17 +73,17 @@ namespace Objects
             float green = kd * loG * cosNL + ks * loG * cosVRM;
             float blue = kd * loB * cosNL + ks * loB * cosVRM;
 
-            return new Vector4(red, green, blue, 1);
+            return new Vector3(red, green, blue);
         }
     }
 
     public class AmbientLight : Light
     {
-        public AmbientLight(Vector4 color) : base(color, Vector4.Zero)
+        public AmbientLight(Vector3 color) : base(color, Vector4.Zero)
         {
         }
 
-        public override Vector4 getIntensity(Vertex vertex, Vector3 camPos)
+        public override Vector3 getIntensity(Vertex vertex, Vector3 camPos)
         {
             return color;
         }
@@ -94,7 +94,7 @@ namespace Objects
         public Vector3 spotDirection, D;
         float spotCosineCutoff = 0.3f;
         float spotExponent = 1;
-        public SpotLight(Vector4 color, Vector4 position, Vector3 spotDirection) : base(color, position)
+        public SpotLight(Vector3 color, Vector4 position, Vector3 spotDirection) : base(color, position)
         {
             this.spotDirection = spotDirection;
             D = -Vector3.Normalize(spotDirection);
@@ -105,7 +105,7 @@ namespace Objects
             this.spotDirection = spotDirection;
             D = -Vector3.Normalize(spotDirection);
         }
-        public override Vector4 getIntensity(Vertex vertex, Vector3 camPos)
+        public override Vector3 getIntensity(Vertex vertex, Vector3 camPos)
         {
             Vector3 objectPosition = new Vector3(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
             Vector3 L = Vector3.Normalize(lightPos3 - objectPosition);
@@ -113,7 +113,7 @@ namespace Objects
 
             if (spotCosine < spotCosineCutoff)
             {
-                return Vector4.Zero;
+                return Vector3.Zero;
             }
 
             float spotFactor = (float)Math.Pow(spotCosine, spotExponent);
@@ -139,7 +139,7 @@ namespace Objects
             float green = kd * loG * cosNL + ks * loG * cosVRM * spotFactor;
             float blue = kd * loB * cosNL + ks * loB * cosVRM * spotFactor;
 
-            return new Vector4(red, green, blue, 1); ;
+            return new Vector3(red, green, blue); ;
         }
     }
 }

@@ -1,18 +1,17 @@
 ﻿using Objects;
 using System.Numerics;
-using System.Security.Cryptography.X509Certificates;
 using Utils;
 
 namespace CPU_Rendering;
 
 public interface IShader<T>
 {
-    public static abstract T Process(T state);
+    public static abstract T? Process(T state);
 }
 
-public interface IVetexShader<Q, T>
+public interface ITransformShader<Q, T>
 {
-    public static abstract ICollection<T> Process(Q state);
+    public static abstract IEnumerable<T> Process(Q state);
 }
 
 internal partial class Pipeline
@@ -28,12 +27,16 @@ internal partial class Pipeline
     static Graphics g { get { return currentGraphics; } }
     static PictureBox Canvas { get { return canvas; } 
         set { canvas = value; ZBuffer = new double[Canvas.Width, Canvas.Height]; } }
-
+    
+    // Global variables
+    static List<Light> lights;
+    static Camera currentCam;
 
     public static float fogFactor = 0.1f;
     static Vector3 constantColor;
 
-    private static readonly ProcessingChain<IRenderable, Traiangle> shaders;
+    private static readonly ProcessingChain<IRenderable, Traiangle> geometryShaders;
+    private static readonly ProcessingChain<Traiangle, Pixel> fragmentShaders;
 
     static Pipeline()
     {
@@ -43,15 +46,19 @@ internal partial class Pipeline
                 new Vector3(0, 1, 0));
 
         Pipeline.viewMatrix = movingCam.GetViewMatrix();
-        shaders = new ProcessingChain<IRenderable, Traiangle>(
+
+        geometryShaders = new ProcessingChain<IRenderable, Traiangle>(
             VertexShader.Process,
-            [
-                Lighting.Process,
-                Projection.Process,
+            [        
+                BackfaceCulling.Process,
                 Clipping.Process,
-                WindowViewpointTransformation.Process,
-                DrawModule.Process,
+                Projection.Process,
             ]);
+
+        fragmentShaders = new ProcessingChain<Traiangle, Pixel>(
+            Rasterization.Process,
+            []
+            );
     }
     public Pipeline(PictureBox Canvas)
     {
@@ -68,7 +75,7 @@ internal partial class Pipeline
     public void StartProcessing(ICollection<IRenderable> objects)
     {
         Parallel.ForEach(objects, 
-            (IRenderable obj) => shaders.Execute(obj));
+            (IRenderable obj) => geometryShaders.Execute(obj));
     }
 }
 

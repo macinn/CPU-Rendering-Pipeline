@@ -38,8 +38,8 @@ namespace Objects
             return vertices.ToList().Select(
                 v =>
                 {
-                    Vector4 normal = Vector4.Transform(v.Normal, ModelMatrix);
-                    normal = Vector4.Transform(normal, ViewMatrix);
+                    Vector3 normal = Vector3.Transform(v.Normal, ModelMatrix);
+                    normal = Vector3.Transform(normal, ViewMatrix);
 
                     Vector4 projectedPosition = Vector4.Transform(v.Position, ModelMatrix);
                     projectedPosition = Vector4.Transform(projectedPosition, ViewMatrix);
@@ -86,14 +86,14 @@ namespace Objects
     }
     public class Cube : IRenderable
     {
-        public Cube(float a, Vector4 color)
+        public Cube(float a, Vector3 color)
         {
             vertices = CreateCubeVertices(a, color).ToArray();
             indices = CreateIndices();
 
             ModelMatrix = Matrix4x4.CreateTranslation(new Vector3(-a / 2, -a / 2, -a / 2));
         }
-        static Vertex[] CreateCubeVertices(float sideLength, Vector4 color)
+        static Vertex[] CreateCubeVertices(float sideLength, Vector3 color)
         {
             Vector4 LeftUpBack = new Vector4(0, sideLength, 0, 1);
             Vector4 RightUpBack = new Vector4(sideLength, sideLength, 0, 1);
@@ -104,27 +104,23 @@ namespace Objects
             Vector4 RightDownFront = new Vector4(sideLength, 0, sideLength, 1);
             Vector4 LeftDownFront = new Vector4(0, 0, sideLength, 1);
 
-            Vector4 frontN = new Vector4(0, 0, 1, 0);
-            Vector4 backN = new Vector4(0, 0, -1, 0);
+            Vector3 frontN = new Vector3(0, 0, 1);
+            Vector3 backN = new Vector3(0, 0, -1);
 
-            Vector4 leftN = new Vector4(-1, 0, 0, 0);
-            Vector4 rightN = new Vector4(1, 0, 0, 0);
+            Vector3 leftN = new Vector3(-1, 0, 0);
+            Vector3 rightN = new Vector3(1, 0, 0);
 
-            Vector4 upN = new Vector4(0, 1, 0, 0);
-            Vector4 downN = new Vector4(0, -1, 0, 0);
+            Vector3 upN = new Vector3(0, 1, 0);
+            Vector3 downN = new Vector3(0, -1, 0);
 
-            // TODO: fix backface
-            //backN *= -1;
-            //frontN *= -1;
+            Vector3 leftColor = new Vector3(1, 0, 1);
+            Vector3 rightColor = color;
 
-            Vector4 leftColor = new Vector4(1, 0, 1, 1);
-            Vector4 rightColor = color;
+            Vector3 upColor = color;
+            Vector3 downColor = color;
 
-            Vector4 upColor = color;
-            Vector4 downColor = color;
-
-            Vector4 frontColor = color;
-            Vector4 backColor = color;
+            Vector3 frontColor = color;
+            Vector3 backColor = color;
 
 
             Vertex[] vertices = new Vertex[24]
@@ -313,13 +309,13 @@ namespace Objects
 
     public class Sphere : IRenderable
     {
-        public Sphere(float radius, int meridians, int parallels, Vector4 color)
+        public Sphere(float radius, int meridians, int parallels, Vector3 color)
         {
             vertices = CreateSphereVertices(radius, meridians, parallels, color).ToArray();
             indices = CreateIndices(meridians, parallels);
         }
 
-        static Vertex[] CreateSphereVertices(float radius, int meridians, int parallels, Vector4 color)
+        static Vertex[] CreateSphereVertices(float radius, int meridians, int parallels, Vector3 color)
         {
             List<Vertex> vertices = new List<Vertex>();
             float meridianAngle = 2 * MathF.PI / meridians;
@@ -336,8 +332,9 @@ namespace Objects
                     float z = radius * MathF.Sin(parallel) * MathF.Sin(meridian);
 
                     Vector4 position = new Vector4(x, y, z, 1);
-                    Vector4 normal = Vector4.Normalize(position);
-                    Vector4 color1 = color;
+                    Vector3 normal = new Vector3(x,y,z);
+                    normal = Vector3.Normalize(normal);
+                    Vector3 color1 = color;
 
                     vertices.Add(new Vertex()
                     {
