@@ -8,7 +8,7 @@ namespace CPU_Rendering;
 
 internal partial class Pipeline
 {
-    class Lighting : IShader<Traiangle>
+    class VertexLighting : IShader<Traiangle>
     {
         public static Traiangle Process(Traiangle state)
         {

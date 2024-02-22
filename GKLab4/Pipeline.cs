@@ -30,6 +30,7 @@ internal partial class Pipeline
     
     // Global variables
     static List<Light> lights;
+    static Vector3 backgroundColor;
     static Camera currentCam;
 
     public static float fogFactor = 0.1f;
@@ -49,7 +50,8 @@ internal partial class Pipeline
 
         geometryShaders = new ProcessingChain<IRenderable, Traiangle>(
             VertexShader.Process,
-            [        
+            [
+                VertexLighting.Process,
                 BackfaceCulling.Process,
                 Clipping.Process,
                 Projection.Process,
@@ -57,7 +59,10 @@ internal partial class Pipeline
 
         fragmentShaders = new ProcessingChain<Traiangle, Pixel>(
             Rasterization.Process,
-            []
+            [
+                FragmentLighting.Process,
+                Fog.Process,
+                ]
             );
     }
     public Pipeline(PictureBox Canvas)

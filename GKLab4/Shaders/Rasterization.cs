@@ -11,7 +11,6 @@ namespace CPU_Rendering
             Vertex P2 = state.Vertices[1];
             Vertex P3 = state.Vertices[2];
 
-
             if (P1.Position.Y > P2.Position.Y)
             {
                 (P2, P1) = (P1, P2);
