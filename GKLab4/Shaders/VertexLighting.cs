@@ -10,7 +10,7 @@ internal partial class Pipeline
 {
     class VertexLighting : IShader<Traiangle>
     {
-        public static Traiangle Process(Traiangle state)
+        public static Traiangle? Process(Traiangle state)
         {
             Vector3[] I = new Vector3[3];
             foreach (Light light in lights)

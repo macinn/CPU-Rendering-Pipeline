@@ -7,29 +7,21 @@ using System.Threading.Tasks;
 
 namespace Utils
 {
-    public class Pixel
+    public struct Pixel(int x, int y, double z, Vector3 color)
     {
-        public int X;
-        public int Y;
-        public double Z;
-        public Vector3 Color;
-
-        public Pixel(int x, int y, double z, Vector3 color)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-            Color = color;
-        }
+        public int X = x;
+        public int Y = y;
+        public double Z = z;
+        public Vector3 Color = color;
     }
-    public class Vertex
+    public struct Vertex
     {
         public Vector4 Position;
         public Vector3 Normal;
         public Vector3 Color;
     }
 
-    public class Traiangle
+    public struct Traiangle
     {
         public Vertex[] Vertices;
         public Traiangle(Vertex v1, Vertex v2, Vertex v3)

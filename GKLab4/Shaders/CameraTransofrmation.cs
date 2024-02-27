@@ -7,7 +7,7 @@ internal partial class Pipeline
 {
     class CameraTransofrmation : IShader<Traiangle>
     {
-        public static Traiangle Process(Traiangle state)
+        public static Traiangle? Process(Traiangle state)
         {
             updateVertex(ref state.Vertices[0]);
             updateVertex(ref state.Vertices[1]);
@@ -16,7 +16,7 @@ internal partial class Pipeline
             return state;
 
             void updateVector(ref Vector4 vector) 
-                => vector = Vector4.Transform(vector, Pipeline.viewMatrix);
+                => vector = Vector4.Transform(vector, Pipeline.ViewMatrix);
 
             void updateVertex(ref Vertex vertex)
             {

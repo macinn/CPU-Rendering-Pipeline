@@ -5,55 +5,52 @@ using Utils;
 namespace CPU_Rendering;
 
 public interface IShader<T>
+    where T : struct
 {
     public static abstract T? Process(T state);
 }
 
 public interface ITransformShader<Q, T>
+    where T : struct
 {
     public static abstract IEnumerable<T> Process(Q state);
 }
 
 internal partial class Pipeline
 {
-    public static Matrix4x4 viewMatrix;
-    public static Matrix4x4 projMatrix;
+    static public Matrix4x4 ViewMatrix => currentCam.GetViewMatrix();
+    static public Matrix4x4 ProjMatrix;
 
-    // Drawing
-    static double[,] ZBuffer;
-    static Bitmap bitmap;
-    static Graphics currentGraphics;
-    static PictureBox canvas;
-    static Graphics g { get { return currentGraphics; } }
-    static PictureBox Canvas { get { return canvas; } 
-        set { canvas = value; ZBuffer = new double[Canvas.Width, Canvas.Height]; } }
-    
     // Global variables
     static List<Light> lights;
     static Vector3 backgroundColor;
     static Camera currentCam;
 
-    public static float fogFactor = 0.1f;
-    static Vector3 constantColor;
+    private readonly ProcessingChain<IRenderable, Traiangle> geometryShaders;
+    private readonly ProcessingChain<Traiangle, Pixel> fragmentShaders;
+    private readonly DrawModule drawModule;
 
-    private static readonly ProcessingChain<IRenderable, Traiangle> geometryShaders;
-    private static readonly ProcessingChain<Traiangle, Pixel> fragmentShaders;
-
-    static Pipeline()
+    public Pipeline(PictureBox Canvas)
     {
-        Camera movingCam = new(
+        Camera cam = new(
                 new Vector3(3, 3, 30),
                 new Vector3(0, 0, 0),
                 new Vector3(0, 1, 0));
 
-        Pipeline.viewMatrix = movingCam.GetViewMatrix();
+        currentCam = cam;
+
+        ProjMatrix = Matrix4x4.CreatePerspectiveFieldOfView(
+            MathF.PI / 4,
+            Canvas.Width / Canvas.Height,
+            0.1f,
+            10000f);
 
         geometryShaders = new ProcessingChain<IRenderable, Traiangle>(
             VertexShader.Process,
             [
-                VertexLighting.Process,
+                // VertexLighting.Process,
                 BackfaceCulling.Process,
-                Clipping.Process,
+                t => Clipping.Process(t, Canvas),
                 Projection.Process,
             ]);
 
@@ -62,25 +59,19 @@ internal partial class Pipeline
             [
                 FragmentLighting.Process,
                 Fog.Process,
-                ]
-            );
+            ]);
+
+        lights = [];
+
+        drawModule = new DrawModule(Canvas);
     }
-    public Pipeline(PictureBox Canvas)
-    {
-        setProjectionMatrix(
-            MathF.PI / 4, 
-            Canvas.Width / Canvas.Height, 
-            0.1f, 
-            10000f);
-    }
-    public static void setProjectionMatrix(float fov, float aspectRatio, float nearPlane, float farPlane)
-    {
-        projMatrix = Matrix4x4.CreatePerspectiveFieldOfView(fov, aspectRatio, nearPlane, farPlane);
-    }
+
     public void StartProcessing(ICollection<IRenderable> objects)
     {
-        Parallel.ForEach(objects, 
-            (IRenderable obj) => geometryShaders.Execute(obj));
+        drawModule.Process(objects
+            .AsParallel()
+            .SelectMany(geometryShaders.Execute)
+            .SelectMany(fragmentShaders.Execute));
     }
 }
 

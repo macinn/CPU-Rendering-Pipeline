@@ -13,7 +13,7 @@ internal partial class Pipeline
             Vertex[] newVerticies = new Vertex[renderable.vertices.Length];
             Array.Copy(renderable.vertices, newVerticies, newVerticies.Length);
 
-            Matrix4x4 MV = renderable.ModelMatrix * Pipeline.viewMatrix;
+            Matrix4x4 MV = renderable.ModelMatrix * Pipeline.ViewMatrix;
 
             for (int i = 0; i < newVerticies.Length; i++)
             {

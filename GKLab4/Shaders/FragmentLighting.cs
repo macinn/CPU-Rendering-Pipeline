@@ -11,6 +11,7 @@ namespace CPU_Rendering
     {
         public static Pixel? Process(Pixel state)
         {
+            // TODO: Implement fragment lighting
             return state;
         }
     }

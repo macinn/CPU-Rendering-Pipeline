@@ -166,7 +166,7 @@ namespace CPU_Rendering
             {
                 amount = 1;
             }
-            Vertex v = new Vertex
+            Vertex v = new()
             {
                 Position = Vector4.Lerp(v1.Position, v2.Position, amount),
                 Color = Vector3.Lerp(v1.Color, v2.Color, amount),

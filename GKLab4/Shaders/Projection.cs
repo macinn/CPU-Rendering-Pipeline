@@ -9,7 +9,7 @@ internal partial class Pipeline
 {
     class Projection : IShader<Traiangle>
     {
-        public static Traiangle Process(Traiangle state)
+        public static Traiangle? Process(Traiangle state)
         {
             updateVertex(ref state.Vertices[0]);
             updateVertex(ref state.Vertices[1]);
@@ -19,7 +19,7 @@ internal partial class Pipeline
 
             void updateVertex(ref Vertex vertex)
             {
-                vertex.Position = Vector4.Transform(vertex.Position, Pipeline.projMatrix);
+                vertex.Position = Vector4.Transform(vertex.Position, Pipeline.ProjMatrix);
                 vertex.Position /= vertex.Position.W;
             }
         }
