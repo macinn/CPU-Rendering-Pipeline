@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System;
 using Utils;
 using System.Drawing;
+using System.Runtime.Versioning;
 
 namespace CPU_Rendering;
 
